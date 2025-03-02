@@ -2,6 +2,23 @@
 P4编译
 基准测试
 
+root@216DGX1:/home/switchml/dev_root/build# ./bin/allreduce_benchmark --tensor-numel=1048576 --tensor-type=int32
+Signal handler thread started. Waiting for any signals.
+Submitting 5 warmup jobs.
+Warmup finished.
+Submitting 10 jobs.
+Job(s) #0# finished. Duration: #247930194# ns Goodput: #0.135338# Gbps.
+Job(s) #1# finished. Duration: #247894665# ns Goodput: #0.135358# Gbps.
+Job(s) #2# finished. Duration: #232051864# ns Goodput: #0.144599# Gbps.
+Job(s) #3# finished. Duration: #227914354# ns Goodput: #0.147224# Gbps.
+Job(s) #4# finished. Duration: #232015511# ns Goodput: #0.144622# Gbps.
+Job(s) #5# finished. Duration: #236068173# ns Goodput: #0.142139# Gbps.
+Job(s) #6# finished. Duration: #235874039# ns Goodput: #0.142256# Gbps.
+Job(s) #7# finished. Duration: #251944270# ns Goodput: #0.133182# Gbps.
+Job(s) #8# finished. Duration: #240000825# ns Goodput: #0.13981# Gbps.
+Job(s) #9# finished. Duration: #236010404# ns Goodput: #0.142174# Gbps.
+All jobs finished.
+
 
 ./bin/allreduce_benchmark --tensor-numel=1048576 --tensor-type=int32
 

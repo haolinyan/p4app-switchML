@@ -44,7 +44,7 @@ class Ports(object):
         self.loopback_ports = []
 
         # PktGen table to configure pktgen ports in loopback mode
-        self.pktgen_port_cfg_table = bfrt_info.table_get('$PKTGEN_PORT_CFG')
+        # self.pktgen_port_cfg_table = bfrt_info.table_get('$PKTGEN_PORT_CFG')
 
     def get_dev_port(self, fp_port, lane):
         ''' Convert front-panel port to dev port.
@@ -350,50 +350,50 @@ class Ports(object):
 
         self.loopback_ports = []
 
-    def set_loopback_mode_pktgen(self, ports=[192, 448]):
-        ''' Sets pktgen ports in loopback mode.
+    # def set_loopback_mode_pktgen(self, ports=[192, 448]):
+    #     ''' Sets pktgen ports in loopback mode.
 
-            Keyword arguments:
-                ports -- list of pktgen dev port numbers (default [192,448])
+    #         Keyword arguments:
+    #             ports -- list of pktgen dev port numbers (default [192,448])
 
-            Returns True on success, False otherwise.
-        '''
+    #         Returns True on success, False otherwise.
+    #     '''
 
-        try:
-            self.pktgen_port_cfg_table.entry_add(self.target, [
-                self.pktgen_port_cfg_table.make_key(
-                    [self.gc.KeyTuple('dev_port', port)]) for port in ports
-            ], [
-                self.pktgen_port_cfg_table.make_data(
-                    [self.gc.DataTuple('recirculation_enable', bool_val=True)])
-            ] * len(ports))
-        except Exception as e:
-            self.log.exception(e)
-            return False
-        else:
-            self.log.info('PktGen ports {} set in loopback mode'.format(ports))
+    #     try:
+    #         self.pktgen_port_cfg_table.entry_add(self.target, [
+    #             self.pktgen_port_cfg_table.make_key(
+    #                 [self.gc.KeyTuple('dev_port', port)]) for port in ports
+    #         ], [
+    #             self.pktgen_port_cfg_table.make_data(
+    #                 [self.gc.DataTuple('recirculation_enable', bool_val=True)])
+    #         ] * len(ports))
+    #     except Exception as e:
+    #         self.log.exception(e)
+    #         return False
+    #     else:
+    #         self.log.info('PktGen ports {} set in loopback mode'.format(ports))
 
-    def get_loopback_mode_pktgen(self, ports=[192, 448]):
-        ''' Gets loopback mode status of pktgen ports.
+    # def get_loopback_mode_pktgen(self, ports=[192, 448]):
+    #     ''' Gets loopback mode status of pktgen ports.
 
-            Keyword arguments:
-                ports -- list of pktgen dev port numbers (default [192,448])
+    #         Keyword arguments:
+    #             ports -- list of pktgen dev port numbers (default [192,448])
 
-            Returns True if all ports are in loopback mode, False otherwise.
-        '''
+    #         Returns True if all ports are in loopback mode, False otherwise.
+    #     '''
 
-        # Check ports state
-        resp = self.pktgen_port_cfg_table.entry_get(self.target, [
-            self.pktgen_port_cfg_table.make_key(
-                [self.gc.KeyTuple('dev_port', port)]) for port in ports
-        ], {'from_hw': False})
+    #     # Check ports state
+    #     resp = self.pktgen_port_cfg_table.entry_get(self.target, [
+    #         self.pktgen_port_cfg_table.make_key(
+    #             [self.gc.KeyTuple('dev_port', port)]) for port in ports
+    #     ], {'from_hw': False})
 
-        loopback_mode = True
-        for v, k in resp:
-            v = v.to_dict()
-            k = k.to_dict()
+    #     loopback_mode = True
+    #     for v, k in resp:
+    #         v = v.to_dict()
+    #         k = k.to_dict()
 
-            if not v['recirculation_enable']:
-                loopback_mode = False
-                break
-        return loopback_mode
+    #         if not v['recirculation_enable']:
+    #             loopback_mode = False
+    #             break
+    #     return loopback_mode
