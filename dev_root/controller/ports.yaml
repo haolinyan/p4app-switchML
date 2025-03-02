@@ -1,5 +1,7 @@
 ports:
-    1/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "00:11:22:33:44:55"}
-    2/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "00:11:22:33:44:66"}
-    3/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "00:11:22:33:44:77"}
-    4/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "00:11:22:33:44:88"}
+    1/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "6c:b3:11:83:00:ee"}
+    3/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "6c:b3:11:83:00:ef"}
+    5/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "6c:b3:11:83:01:2c"}
+    7/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "6c:b3:11:83:01:2d"}
+    9/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "6c:b3:11:83:01:06"}
+    11/0 : {speed: "100G", fec: "none", autoneg: "disable", mac: "6c:b3:11:83:01:07"}

@@ -63,7 +63,7 @@ class NextStepSelector(Control):
         ''' Add default entries '''
 
         # Special recirculation ports used for harvest passes
-        port = {1: 452, 2: 324, 3: 448, 4: 196, 5: 192, 6: 64, 7: 68}
+        port = {1: 452, 2: 324, 3: 448, 4: 64, 5: 68, 6: 192, 7: 196}
 
         # yapf: disable
         entries = [
@@ -89,17 +89,20 @@ class NextStepSelector(Control):
             ## 1024B packets
             entries.extend([
                 ## Pipe 0, packet not seen before -> pipe 1 (load balance on worker id)
-                (PacketSize.MTU_1024,    i, PacketType.CONSUME0,       None,    0, 6, 'recirculate_for_CONSUME1', (1 << 7) + i * 4)
+                ## Pipe 1, packet not seen before -> pipe 0 (load balance on worker id)
+                (PacketSize.MTU_1024,    i, PacketType.CONSUME0,       None,    0, 6, 'recirculate_for_CONSUME1', i * 4)
                 for i in range(16)])
             entries.extend([
                 ## Pipe 0, retransmitted packet to a full slot -> pipe 1
+                ## Pipe 1, retransmitted packet to a full slot -> pipe 0
                 ## Run through the same path as novel packets (do not skip to harvest) to ensure ordering
-                (PacketSize.MTU_1024,    i, PacketType.CONSUME0, Flag.FIRST, None, 7, 'recirculate_for_CONSUME1', (1 << 7) + i * 4)
+                (PacketSize.MTU_1024,    i, PacketType.CONSUME0, Flag.FIRST, None, 7, 'recirculate_for_CONSUME1', i * 4)
                 for i in range(16)])
             entries.extend([
                 ## Drop other CONSUME0 packets
                 (PacketSize.MTU_1024, None, PacketType.CONSUME0,       None, None, 8, 'drop', None),
                 ## Pipe 1 -> pipe 2
+                ## Pipe 0 -> pipe 2
                 (PacketSize.MTU_1024, None, PacketType.CONSUME1,       None, None, 9, 'recirculate_for_CONSUME2_same_port_next_pipe', None),
                 ## Pipe 2 -> pipe 3
                 (PacketSize.MTU_1024, None, PacketType.CONSUME2,       None, None, 10, 'recirculate_for_CONSUME3_same_port_next_pipe', None),
@@ -114,9 +117,9 @@ class NextStepSelector(Control):
                 ## Drop others
                 (PacketSize.MTU_1024, None, PacketType.CONSUME3,       None, None, 14, 'drop', None),
                 ## Harvesting 128B at a time
-                (PacketSize.MTU_1024, None, PacketType.HARVEST0,       None, None, 15, 'recirculate_for_HARVEST1', port[1]),
-                (PacketSize.MTU_1024, None, PacketType.HARVEST1,       None, None, 16, 'recirculate_for_HARVEST2', port[2]),
-                (PacketSize.MTU_1024, None, PacketType.HARVEST2,       None, None, 17, 'recirculate_for_HARVEST3', port[3]),
+                (PacketSize.MTU_1024, None, PacketType.HARVEST0,       None, None, 15, 'recirculate_for_HARVEST1', port[1]), # 452
+                (PacketSize.MTU_1024, None, PacketType.HARVEST1,       None, None, 16, 'recirculate_for_HARVEST2', port[2]), # 324
+                (PacketSize.MTU_1024, None, PacketType.HARVEST2,       None, None, 17, 'recirculate_for_HARVEST3', port[3]), # 448
                 (PacketSize.MTU_1024, None, PacketType.HARVEST3,       None, None, 18, 'recirculate_for_HARVEST4', port[4]),
                 (PacketSize.MTU_1024, None, PacketType.HARVEST4,       None, None, 19, 'recirculate_for_HARVEST5', port[5]),
                 (PacketSize.MTU_1024, None, PacketType.HARVEST5,       None, None, 20, 'recirculate_for_HARVEST6', port[6]),

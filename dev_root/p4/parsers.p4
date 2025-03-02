@@ -48,10 +48,11 @@ parser IngressParser(
         ig_md.port_metadata = port_metadata_unpack<port_metadata_t>(pkt);
 
         transition select(ig_intr_md.ingress_port) {
-            64: parse_recirculate; // pipe 0 CPU Eth port
-            68: parse_recirculate; // pipe 0 recirc port
             320: parse_ethernet;   // pipe 2 CPU PCIe port
-            0x080 &&& 0x180: parse_recirculate; // all pipe 1 ports
+            192: parse_recirculate; // pipe 1 CPU Eth port
+            196: parse_recirculate; // pipe 1 recirc port
+            0x000 &&& 0x180: parse_recirculate; // all pipe 0 ports
+            0x080 &&& 0x180: parse_ethernet; // all pipe 1 ports
             0x100 &&& 0x180: parse_recirculate; // all pipe 2 ports
             0x180 &&& 0x180: parse_recirculate; // all pipe 3 ports
             default:  parse_ethernet;

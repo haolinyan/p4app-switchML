@@ -21,7 +21,7 @@ import asyncio
 import argparse
 import logging
 from concurrent import futures
-
+import threading
 # Add BF Python to search path
 bfrt_location = '{}/lib/python*/site-packages/tofino'.format(
     os.environ['SDE_INSTALL'])
@@ -126,16 +126,16 @@ class SwitchML(object):
                     loopback_ports = (
                         [64] +  # Pipe 0 CPU ethernet port
                         # Pipe 0: all 16 front-panel ports
-                        #list(range(  0,  0+64,4)) +
+                        list(range(  0,  0+64,4)) +
                         # Pipe 1: all 16 front-panel ports
-                        list(range(128, 128 + 64, 4)) +
+                        # list(range(128, 128 + 64, 4)) +
                         # Pipe 2: all 16 front-panel ports
                         list(range(256, 256 + 64, 4)) +
                         # Pipe 3: all 16 front-panel ports
                         list(range(384, 384 + 64, 4)))
                     print(
                         'Setting {} front panel ports in loopback mode'.format(
-                            len(loopback_ports)))
+                            loopback_ports))
                     self.ports.set_loopback_mode(loopback_ports)
 
                     # Enable loopback on PktGen ports
@@ -578,27 +578,32 @@ class SwitchML(object):
 
     def run(self):
         try:
+            grpc_thread = threading.Thread(target=self.grpc_server.run,
+                                           args=(self,))
+            grpc_thread.start()
             # Start listening for RPCs
-            self.grpc_future = self.grpc_executor.submit(
-                self.grpc_server.run, self.event_loop, self)
+            # self.grpc_server.run(self)
+            # self.grpc_future = self.grpc_executor.submit(
+            #     self.grpc_server.run, self.event_loop, self)
 
             self.log.info('gRPC server started')
 
-            # Start CLI
+            # # Start CLI
             self.cli.run()
 
-            # Stop gRPC server and event loop
-            self.event_loop.call_soon_threadsafe(self.grpc_server.stop)
+            # # Stop gRPC server and event loop
+            # self.event_loop.call_soon_threadsafe(self.grpc_server.stop)
 
-            # Wait for gRPC thread to end
-            self.grpc_future.result()
+            # # Wait for gRPC thread to end
+            # self.grpc_future.result()
 
-            # Stop event loop
-            self.event_loop.close()
+            # # Stop event loop
+            # self.event_loop.close()
 
             # Close gRPC executor
-            self.grpc_executor.shutdown()
-
+            # self.grpc_executor.shutdown()
+            self.grpc_server.stop()
+            grpc_thread.join()
             self.log.info('gRPC server stopped')
 
         except Exception as e:
@@ -618,7 +623,7 @@ if __name__ == '__main__':
     argparser.add_argument(
         '--bfrt-ip',
         type=str,
-        default='127.0.0.1',
+        default='0.0.0.0',
         help='Name/address of the BFRuntime server. Default: 127.0.0.1')
     argparser.add_argument('--bfrt-port',
                            type=int,
