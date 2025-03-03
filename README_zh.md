@@ -1,3 +1,73 @@
+我在四个docker容器（镜像来自）中分别测试SwitchML以及NCCL在四个节点上的Allreduce性能，具体地
+所有实验的启动容器的命令如下：
+```
+sudo docker run -dit --gpus device=0 \
+            --net=host --cap-add=IPC_LOCK \
+            --shm-size=32768m \
+            --cap-add SYS_ADMIN \
+            --cap-add SYS_RESOURCE  \
+            --device=/dev/infiniband/uverbs1 \
+            -v /home/yanhl/switchml_shared:/shared \
+            --name switchml-rdma0 \
+            crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:r0.0.5
+```
+
+我主要修改了switchml.cfg中的以下几个参数：
+```
+...
+num_workers = 4
+num_worker_threads = 8
+max_outstanding_packets = 256
+packet_numel = 64
+backend = rdma
+prepostprocessor = bypass 
+msg_numel = 64
+```
+编译benchmark的命令如下：
+```
+make clean
+make allreduce_benchmark RDMA=1 VCL=1 DEBUG=0 CUDA=1
+```
+运行benchmark的命令如下，每次Allreduce 4MB数据
+```
+./bin/allreduce_benchmark --tensor-numel=1048576 --tensor-type=int32 --device=gpu
+```
+结果非常不理想
+```
+Signal handler thread started. Waiting for any signals.
+Submitting 5 warmup jobs.
+Warmup finished.
+Submitting 10 jobs.
+Job(s) #0# finished. Duration: #531972764# ns Goodput: #0.0630755# Gbps.
+Job(s) #1# finished. Duration: #539886204# ns Goodput: #0.0621509# Gbps.
+Job(s) #2# finished. Duration: #575978341# ns Goodput: #0.0582564# Gbps.
+Job(s) #3# finished. Duration: #567985377# ns Goodput: #0.0590762# Gbps.
+Job(s) #4# finished. Duration: #587951282# ns Goodput: #0.0570701# Gbps.
+Job(s) #5# finished. Duration: #572039624# ns Goodput: #0.0586575# Gbps.
+Job(s) #6# finished. Duration: #560061712# ns Goodput: #0.059912# Gbps.
+Job(s) #7# finished. Duration: #575842023# ns Goodput: #0.0582702# Gbps.
+Job(s) #8# finished. Duration: #583945036# ns Goodput: #0.0574616# Gbps.
+Job(s) #9# finished. Duration: #556026482# ns Goodput: #0.0603468# Gbps.
+All jobs finished.
+
+
+Min 531972764 ns 0.0630755 Gbps
+Max 587951282 ns 0.0570701 Gbps
+Median 572039624 ns 0.0586575 Gbps
+Mean 565168884 ns 0.0593706 Gbps
+Std dev 1.73446e+07 ns
+Cleaning up.
+Signal handler thread is exiting
+```
+
+
+
+
+
+
+
+
+
 > xurtyf-topxip-xYpjo4
 P4编译
 基准测试
@@ -33,7 +103,55 @@ sudo sh disable-icrc.sh
 # 启动容器
 
 xurtyf-topxip-xYpjo4
-sudo docker run -it --gpus all --net=host --cap-add=IPC_LOCK --device=/dev/infiniband/uverbs1 -v /home/yanhl/switchml_shared:/shared --name switchml-rdma crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:v0.0.4
+
+
+sudo docker run -dit --gpus device=0 \
+            --net=host --cap-add=IPC_LOCK \
+            --shm-size=32768m \
+            --cap-add SYS_ADMIN \
+            --cap-add SYS_RESOURCE  \
+            --device=/dev/infiniband/uverbs1 \
+            -v /home/yanhl/switchml_shared:/shared \
+            --name switchml-rdma0 \
+            crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:r0.0.5
+
+
+sudo docker run -dit --gpus device=1 \
+            --net=host --cap-add=IPC_LOCK \
+            --shm-size=32768m \
+            --cap-add SYS_ADMIN \
+            --cap-add SYS_RESOURCE  \
+            --device=/dev/infiniband/uverbs2 \
+            -v /home/yanhl/switchml_shared:/shared \
+            --name switchml-rdma1 \
+            crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:r0.0.5
+
+sudo docker run -dit --gpus device=2 \
+            --net=host --cap-add=IPC_LOCK \
+            --shm-size=32768m \
+            --cap-add SYS_ADMIN \
+            --cap-add SYS_RESOURCE  \
+            --device=/dev/infiniband/uverbs3 \
+            -v /home/yanhl/switchml_shared:/shared \
+            --name switchml-rdma2 \
+            crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:r0.0.5
+
+sudo docker run -dit --gpus device=3 \
+            --net=host --cap-add=IPC_LOCK \
+            --shm-size=32768m \
+            --cap-add SYS_ADMIN \
+            --cap-add SYS_RESOURCE  \
+            --device=/dev/infiniband/uverbs4 \
+            -v /home/yanhl/switchml_shared:/shared \
+            --name switchml-rdma3 \
+            crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:r0.0.5
+
+
+
+
+sudo docker exec -it switchml-rdma1 bash
+
+
 sudo docker run -it --gpus all --net=host --cap-add=IPC_LOCK --device=/dev/infiniband/uverbs2 -v /home/yanhl/switchml_shared:/shared --name switchml-rdma2 crpi-iyh7vkeseh80me1w.cn-shenzhen.personal.cr.aliyuncs.com/yanhaolin/switchml:v0.0.4
 
 

@@ -168,9 +168,14 @@ inline std::unordered_map<int, std::vector<int>> GetCoresNuma() {
  * @return int the NUMA node which this ibverbs device resides on.
  */
 inline int GetDeviceNuma(ibv_device* device) {
-    std::string cmd_output = Execute( ( "cat /sys/class/infiniband/" + std::string(ibv_get_device_name(device)) + "/device/numa_node" ).c_str() );
-    int numa_node = std::stoi(cmd_output);
-    return numa_node;
+    std::string dev_name = std::string(ibv_get_device_name(device));
+    if (dev_name == "mlx5_0" || dev_name == "mlx5_1" || dev_name == "mlx5_2" || dev_name == "mlx5_3") {
+        return 0;
+    } else if (dev_name == "mlx5_4" || dev_name == "mlx5_5" || dev_name == "mlx5_6" || dev_name == "mlx5_7") {
+        return 1;
+    } else {
+        LOG(FATAL) << "Device " << dev_name << " is not supported.";
+    }
 }
 
 
